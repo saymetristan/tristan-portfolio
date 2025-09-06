@@ -1,0 +1,2852 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>constructor de productos con ia</title>
+    <meta name="description" content="construyo productos con ia que la gente sí usa. whatsapp-first, api-friendly, developer mindset.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <style>
+        :root {
+            /* Dark Theme (Default) */
+            --bg-base: #0B0B0C;
+            --bg-surface: #111213;
+            --text-primary: #EDEDED;
+            --text-secondary: #B7B7B7;
+            --text-muted: #7A7A7A;
+            --border-subtle: #222326;
+            --border-cards: #2E3033;
+            --lime-primary: #A3E635;
+            --lime-hover: #84CC16;
+            --lime-soft: #D9F99D;
+            
+            /* Typography - System fonts for better performance */
+            --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        /* Light Theme */
+        [data-theme="light"] {
+            /* Warm Light Theme - more contrast and character */
+            --bg-base: #F8F9FB;
+            --bg-surface: #ECEEF2;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #4B5563;
+            --border-subtle: #D1D5DB;
+            --border-cards: #9CA3AF;
+            --lime-primary: #65A30D;
+            --lime-hover: #4D7C0F;
+            --lime-soft: #84CC16;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        html {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            font-size: 16px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(163, 230, 53, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(163, 230, 53, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(163, 230, 53, 0.01) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Animated Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.02;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(163, 230, 53, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(163, 230, 53, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Typography Scale */
+        .h1 { 
+            font-size: clamp(2.5rem, 5vw, 3.5rem); 
+            font-family: var(--font-display); 
+            font-weight: 600; 
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--text-primary) 0%, rgba(163, 230, 53, 0.8) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .h2 { font-size: clamp(2rem, 4vw, 2.5rem); font-family: var(--font-display); font-weight: 600; line-height: 1.2; }
+        .h3 { font-size: clamp(1.5rem, 3vw, 1.75rem); font-family: var(--font-display); font-weight: 500; line-height: 1.3; }
+        .body-lg { font-size: 18px; line-height: 1.7; }
+        .body { font-size: 16px; line-height: 1.6; }
+        .small { font-size: 14px; line-height: 1.5; }
+        .micro { font-size: 12px; line-height: 1.4; }
+
+        /* Container & Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 32px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+        /* Spacing */
+        .py-16 { padding: 16px 0; } .py-24 { padding: 24px 0; } .py-32 { padding: 32px 0; }
+        .py-48 { padding: 48px 0; } .py-64 { padding: 64px 0; } .py-96 { padding: 96px 0; }
+
+        /* Glassmorphism Card */
+        .card {
+            background: rgba(17, 18, 19, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(163, 230, 53, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--lime-primary), transparent);
+            opacity: 0;
+            transition: opacity 400ms ease;
+        }
+
+        .card:hover::before {
+            opacity: 0.6;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(163, 230, 53, 0.2);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(163, 230, 53, 0.1),
+                0 0 80px rgba(163, 230, 53, 0.1);
+        }
+
+        /* ===== LIGHT MODE OVERRIDES ===== */
+        
+        /* Light mode cards */
+        [data-theme="light"] .card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(101, 163, 13, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        [data-theme="light"] .card:hover {
+            border-color: rgba(101, 163, 13, 0.3);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(101, 163, 13, 0.2),
+                0 0 80px rgba(101, 163, 13, 0.08);
+        }
+        
+        /* Light mode header */
+        [data-theme="light"] .header {
+            background: rgba(248, 249, 251, 0.9);
+            border-bottom: 1px solid rgba(101, 163, 13, 0.15);
+        }
+        
+        [data-theme="light"] .header.scrolled {
+            background: rgba(248, 249, 251, 0.98);
+            border-bottom-color: rgba(101, 163, 13, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Light mode buttons */
+        [data-theme="light"] .btn-secondary {
+            background: rgba(101, 163, 13, 0.08);
+            border: 2px solid rgba(101, 163, 13, 0.2);
+        }
+        
+        [data-theme="light"] .btn-secondary:hover {
+            background: rgba(101, 163, 13, 0.15);
+            box-shadow: 0 10px 30px rgba(101, 163, 13, 0.15);
+        }
+        
+        /* Light mode theme toggle */
+        [data-theme="light"] .theme-toggle {
+            background: rgba(101, 163, 13, 0.08);
+            border: 2px solid rgba(101, 163, 13, 0.2);
+        }
+        
+        [data-theme="light"] .theme-toggle:hover {
+            background: rgba(101, 163, 13, 0.12);
+        }
+        
+        [data-theme="light"] .sound-toggle {
+            background: rgba(101, 163, 13, 0.08);
+            border: 2px solid rgba(101, 163, 13, 0.2);
+        }
+        
+        [data-theme="light"] .sound-toggle:hover {
+            background: rgba(101, 163, 13, 0.12);
+        }
+        
+        /* Light mode about section */
+        [data-theme="light"] .about-teaser {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(101, 163, 13, 0.2);
+            box-shadow: 
+                0 12px 40px rgba(0, 0, 0, 0.12),
+                0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Light mode footer */
+        [data-theme="light"] .footer {
+            border-top: 1px solid rgba(101, 163, 13, 0.2);
+            background: rgba(236, 238, 242, 0.9);
+        }
+        
+        [data-theme="light"] .footer-links a:hover {
+            background: rgba(101, 163, 13, 0.08);
+        }
+        
+        /* Light mode tags */
+        [data-theme="light"] .tag {
+            border: 1px solid rgba(101, 163, 13, 0.25);
+            background: rgba(101, 163, 13, 0.06);
+        }
+        
+        [data-theme="light"] .tag:hover {
+            box-shadow: 0 4px 12px rgba(101, 163, 13, 0.15);
+        }
+        
+        /* Light mode scroll progress */
+        [data-theme="light"] .scroll-progress {
+            background: rgba(101, 163, 13, 0.15);
+        }
+        
+        /* Light mode easter egg */
+        [data-theme="light"] .easter-egg {
+            background: rgba(247, 248, 250, 0.95);
+            border: 1px solid rgba(101, 163, 13, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Light mode background gradients */
+        [data-theme="light"] body::before {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(101, 163, 13, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(101, 163, 13, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(101, 163, 13, 0.04) 0%, transparent 50%);
+        }
+        
+        /* Light mode terminal window */
+        [data-theme="light"] .terminal-window {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(101, 163, 13, 0.2);
+            box-shadow: 0 0 50px rgba(101, 163, 13, 0.2);
+        }
+        
+        [data-theme="light"] .terminal-overlay {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Magnetic Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            height: 52px;
+            position: relative;
+            overflow: hidden;
+            min-width: 160px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 500ms ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--lime-primary), var(--lime-hover));
+            color: var(--bg-base);
+            box-shadow: 0 8px 32px rgba(163, 230, 53, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(163, 230, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(163, 230, 53, 0.05);
+            color: var(--lime-primary);
+            border: 2px solid rgba(163, 230, 53, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(163, 230, 53, 0.1);
+            border-color: var(--lime-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(163, 230, 53, 0.2);
+        }
+
+        /* Animated Links */
+        .link {
+            color: var(--lime-primary);
+            text-decoration: none;
+            position: relative;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--lime-primary), var(--lime-hover));
+            border-radius: 1px;
+            transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .link:hover::after {
+            width: 100%;
+        }
+
+        .link:hover {
+            transform: translateX(4px);
+        }
+
+        /* Spectacular Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(11, 11, 12, 0.7);
+            border-bottom: 1px solid rgba(163, 230, 53, 0.05);
+            transition: all 300ms ease;
+        }
+
+        .header.scrolled {
+            background: rgba(11, 11, 12, 0.9);
+            border-bottom-color: rgba(163, 230, 53, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .nav-brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            position: relative;
+            transition: all 300ms ease;
+        }
+
+        .nav-brand:hover {
+            transform: scale(1.05);
+            color: var(--lime-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 250ms ease;
+            position: relative;
+            padding: 8px 0;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--lime-primary);
+            border-radius: 1px;
+            transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .nav-links a:hover {
+            color: var(--lime-primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        /* Dark/Light Mode Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(163, 230, 53, 0.1);
+            border: 2px solid rgba(163, 230, 53, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--lime-primary);
+            background: rgba(163, 230, 53, 0.15);
+        }
+
+        .theme-toggle-slider {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: var(--lime-primary);
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 8px rgba(163, 230, 53, 0.3);
+            left: 4px;
+        }
+
+        .theme-toggle[data-theme="light"] .theme-toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .theme-icon {
+            font-size: 12px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .theme-toggle[data-theme="dark"] .sun-icon {
+            opacity: 0.4;
+        }
+
+        .theme-toggle[data-theme="light"] .moon-icon {
+            opacity: 0.4;
+        }
+
+        .theme-toggle[data-theme="dark"] .moon-icon,
+        .theme-toggle[data-theme="light"] .sun-icon {
+            opacity: 1;
+        }
+
+        /* Sound Toggle */
+        .sound-toggle {
+            width: 40px;
+            height: 40px;
+            background: rgba(163, 230, 53, 0.1);
+            border: 2px solid rgba(163, 230, 53, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .sound-toggle:hover {
+            border-color: var(--lime-primary);
+            background: rgba(163, 230, 53, 0.15);
+            transform: scale(1.1);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.5;
+        }
+        
+        /* Controls group styling */
+        .nav > div > div:last-child {
+            background: rgba(17, 18, 19, 0.3);
+            border: 1px solid rgba(163, 230, 53, 0.08);
+            border-radius: 50px;
+            padding: 8px 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        [data-theme="light"] .nav > div > div:last-child {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(101, 163, 13, 0.15);
+        }
+
+        /* Modern AI Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Neural Network Background */
+        .neural-network {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--lime-primary);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .network-connection {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--lime-primary), transparent);
+            opacity: 0.3;
+            transform-origin: left;
+        }
+
+        /* Floating Code Elements */
+        .code-fragments {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .code-fragment {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--lime-primary);
+            opacity: 0.4;
+            font-weight: 500;
+        }
+
+        /* Typewriter Effect */
+        .typewriter-container {
+            position: relative;
+        }
+
+        .typewriter-text {
+                opacity: 0;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em;
+            background: var(--lime-primary);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 1;
+        }
+
+        .hero-subtitle {
+            display: none;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(20px);
+            margin-top: 48px;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+
+        /* Project Cards with 3D Effect */
+        .project-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 500ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .project-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(163, 230, 53, 0.05), rgba(163, 230, 53, 0.02));
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 300ms ease;
+            pointer-events: none;
+        }
+
+        .project-card:hover::after {
+            opacity: 1;
+        }
+
+        .project-card:hover {
+            transform: rotateX(5deg) rotateY(-5deg) translateZ(20px);
+        }
+
+        .project-title {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            transition: color 300ms ease;
+        }
+
+        .project-card:hover .project-title {
+            color: var(--lime-primary);
+        }
+
+        .project-tagline {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .project-metrics {
+            color: var(--lime-primary);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+
+        /* Blog Cards with Image Effects */
+        .blog-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 400ms ease;
+        }
+
+        .blog-image {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #1a1b1c, #2a2b2c);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blog-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 30%, rgba(163, 230, 53, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 600ms ease;
+        }
+
+        .blog-card:hover .blog-image::before {
+            transform: translateX(100%);
+        }
+
+        .blog-image::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(163, 230, 53, 0.15), transparent);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 400ms ease;
+        }
+
+        .blog-card:hover .blog-image::after {
+            opacity: 1;
+        }
+
+        .blog-meta {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .blog-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .blog-excerpt {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Enhanced About Section */
+        .about-teaser {
+            background: rgba(17, 18, 19, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(163, 230, 53, 0.1);
+            border-radius: 32px;
+            padding: 48px;
+            margin: 64px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-teaser::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(163, 230, 53, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(163, 230, 53, 0.02) 0%, transparent 60%);
+            animation: floatSlow 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.05); }
+        }
+
+        /* Enhanced Tags */
+        .tag {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid rgba(163, 230, 53, 0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 250ms ease;
+            background: rgba(163, 230, 53, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .tag:hover {
+            border-color: var(--lime-primary);
+            color: var(--lime-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(163, 230, 53, 0.2);
+        }
+
+        /* Section Dividers */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--lime-primary), transparent);
+            margin: 80px 0;
+            opacity: 0.4;
+            position: relative;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--lime-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--lime-primary);
+        }
+
+        /* Enhanced Footer */
+        .footer {
+            border-top: 1px solid rgba(163, 230, 53, 0.1);
+            background: rgba(17, 18, 19, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 64px 0;
+            margin-top: 120px;
+            position: relative;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 32px;
+        }
+
+        .footer-tagline {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 250ms ease;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .footer-links a:hover {
+            color: var(--lime-primary);
+            background: rgba(163, 230, 53, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Easter Egg Enhanced */
+        .easter-egg {
+            position: relative;
+        }
+
+        .easter-egg:hover::after {
+            content: 'papá de leah';
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(17, 18, 19, 0.95);
+            backdrop-filter: blur(10px);
+            color: var(--lime-primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            animation: popIn 1.2s ease-in-out;
+            border: 1px solid rgba(163, 230, 53, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); }
+            20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.8); }
+        }
+
+        /* Responsive Enhancements */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 24px;
+            }
+            
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 0 20px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .about-teaser {
+                padding: 32px;
+            }
+
+            .project-card:hover {
+                transform: translateY(-4px);
+            }
+        }
+
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-base);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-text {
+            color: var(--lime-primary);
+            font-size: 14px;
+            margin: 4px 0;
+            opacity: 0;
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 4px;
+            background: rgba(163, 230, 53, 0.2);
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--lime-primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Terminal Overlay */
+        .terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+                display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .terminal-window {
+            width: 600px;
+            height: 400px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid var(--lime-primary);
+            box-shadow: 0 0 50px rgba(163, 230, 53, 0.3);
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f5f; }
+        .dot-yellow { background: #ffff5f; }
+        .dot-green { background: #5fff5f; }
+
+        .terminal-content {
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            color: var(--lime-primary);
+            height: calc(100% - 48px);
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin: 8px 0;
+            opacity: 0;
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background: var(--lime-primary);
+            animation: blink 1s infinite;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        .glitch::before {
+            color: #ff00ff;
+            animation: glitch-1 0.3s ease-in-out;
+        }
+
+        .glitch::after {
+            color: #00ffff;
+            animation: glitch-2 0.3s ease-in-out;
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { transform: translate(0); opacity: 0; }
+            20% { transform: translate(-2px, 2px); opacity: 1; }
+            40% { transform: translate(-2px, -2px); opacity: 1; }
+            60% { transform: translate(2px, 2px); opacity: 1; }
+            80% { transform: translate(2px, -2px); opacity: 1; }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { transform: translate(0); opacity: 0; }
+            20% { transform: translate(2px, 2px); opacity: 1; }
+            40% { transform: translate(2px, -2px); opacity: 1; }
+            60% { transform: translate(-2px, 2px); opacity: 1; }
+            80% { transform: translate(-2px, -2px); opacity: 1; }
+        }
+
+        /* Scroll Progress */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: rgba(163, 230, 53, 0.1);
+            z-index: 1001;
+        }
+
+        .scroll-indicator {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, var(--lime-primary), var(--lime-hover));
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            .grid-bg {
+                animation: none;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Loading Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="terminal-text" id="line-1">> inicializando sistema...</div>
+        <div class="terminal-text" id="line-2">> cargando módulos de ia...</div>
+        <div class="terminal-text" id="line-3">> conectando apis...</div>
+        <div class="terminal-text" id="line-4">> compilando experiencia...</div>
+        <div class="terminal-text" id="line-5">> listo para impresionar</div>
+        <div class="loading-progress">
+            <div class="loading-bar" id="loading-bar"></div>
+        </div>
+    </div>
+
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress">
+        <div class="scroll-indicator" id="scroll-indicator"></div>
+    </div>
+
+    <!-- Terminal Overlay -->
+    <div class="terminal-overlay" id="terminal-overlay">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dot dot-red"></div>
+                <div class="terminal-dot dot-yellow"></div>
+                <div class="terminal-dot dot-green"></div>
+                <span style="color: #ccc; margin-left: 12px; font-size: 12px;">tristan@portfolio:~</span>
+            </div>
+            <div class="terminal-content" id="terminal-content">
+                <div class="terminal-line">tristan@portfolio:~$ <span class="terminal-cursor"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-bg"></div>
+    
+    <header class="header" id="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="nav-brand easter-egg">jorge tristan</a>
+                <div style="display: flex; align-items: center; gap: 32px;">
+                <ul class="nav-links">
+                    <li><a href="#sobre">sobre mí</a></li>
+                    <li><a href="#proyectos">proyectos</a></li>
+                    <li><a href="#blog">blog</a></li>
+                </ul>
+                    
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div class="theme-toggle" id="theme-toggle" data-theme="dark">
+                            <span class="theme-icon moon-icon">🌙</span>
+                            <div class="theme-toggle-slider"></div>
+                            <span class="theme-icon sun-icon">☀️</span>
+                        </div>
+                        
+                        <div class="sound-toggle" id="sound-toggle" title="Toggle Sound">
+                            <span id="sound-icon">🔊</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <!-- Neural Network Background -->
+            <div class="neural-network" id="neural-network"></div>
+            
+            <!-- Floating Code Elements -->
+            <div class="code-fragments" id="code-fragments"></div>
+            
+            <div class="container">
+                <div class="hero-content">
+                    <div class="typewriter-container">
+                        <h1 class="h1 hero-title">
+                            <span class="typewriter-text" id="typewriter" data-text=""></span>
+                            <span class="cursor" id="hero-cursor"></span>
+                        </h1>
+                    </div>
+                    <p class="body-lg hero-subtitle"></p>
+                    <div class="hero-actions">
+                        <a href="#proyectos" class="btn btn-primary">ver proyectos</a>
+                        <a href="#blog" class="btn btn-secondary">leer blog</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Projects -->
+        <section id="proyectos" class="py-64">
+            <div class="container">
+                <h2 class="h2" style="margin-bottom: 64px;">proyectos destacados</h2>
+                
+                <div class="grid grid-3">
+                    <article class="card project-card fade-in fade-in-delay-1">
+                        <div>
+                            <h3 class="project-title">whaapy</h3>
+                            <p class="project-tagline">whatsapp api para equipos (latam)</p>
+                        </div>
+                        <p class="small" style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">integración oficial con meta, envíos masivos inteligentes, chatbots con ia nativa. diseñado para equipos que necesitan escalar comunicación sin perder el toque humano.</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                            <span class="tag">whatsapp business</span>
+                            <span class="tag">openai</span>
+                            <span class="tag">node.js</span>
+                        </div>
+                        <p class="project-metrics">⚡ tiempo de integración < 10 min</p>
+                    </article>
+
+                    <article class="card project-card fade-in fade-in-delay-2">
+                        <div>
+                            <h3 class="project-title">autoflow</h3>
+                            <p class="project-tagline">workflows que se configuran solos</p>
+                        </div>
+                        <p class="small" style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">automatización adaptativa que aprende de patrones de uso y optimiza procesos sin intervención manual. machine learning aplicado a productividad real.</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                            <span class="tag">machine learning</span>
+                            <span class="tag">zapier</span>
+                            <span class="tag">python</span>
+                        </div>
+                        <p class="project-metrics">🚀 reduce setup time 80%</p>
+                    </article>
+
+                    <article class="card project-card fade-in fade-in-delay-3">
+                        <div>
+                            <h3 class="project-title">runner.ai</h3>
+                            <p class="project-tagline">entrenador personal inteligente</p>
+                        </div>
+                        <p class="small" style="color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">planes de entrenamiento personalizados que se adaptan en tiempo real a tu progreso, condiciones climáticas y niveles de fatiga. ciencia del deporte + ia.</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                            <span class="tag">react native</span>
+                            <span class="tag">tensorflow</span>
+                            <span class="tag">strava api</span>
+                        </div>
+                        <p class="project-metrics">🏃‍♂️ mejora rendimiento 35%</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Latest Blog Posts -->
+        <section id="blog" class="py-64">
+            <div class="container">
+                <h2 class="h2" style="margin-bottom: 64px;">últimos del blog</h2>
+                
+                <div class="grid grid-3">
+                    <article class="card blog-card fade-in fade-in-delay-1">
+                        <div class="blog-image"></div>
+                        <div class="blog-meta">hace 3 días · building in public</div>
+                        <h3 class="blog-title">por qué los chatbots fallan (y cómo arreglarlos)</h3>
+                        <p class="blog-excerpt">la mayoría de bots son básicamente faqs con esteroides. aquí te explico cómo construir conversaciones que realmente ayuden y generen valor.</p>
+                    </article>
+
+                    <article class="card blog-card fade-in fade-in-delay-2">
+                        <div class="blog-image"></div>
+                        <div class="blog-meta">hace 1 semana · entrenamiento</div>
+                        <h3 class="blog-title">correr 42k sin morir en el intento</h3>
+                        <p class="blog-excerpt">lecciones durísimas de mi primer maratón: desde el kilometro 30 todo es mental. aquí mis aprendizajes más valiosos sobre resistencia y mente.</p>
+                    </article>
+
+                    <article class="card blog-card fade-in fade-in-delay-3">
+                        <div class="blog-image"></div>
+                        <div class="blog-meta">hace 2 semanas · producto</div>
+                        <h3 class="blog-title">apis que no dan vergüenza ajena</h3>
+                        <p class="blog-excerpt">diseño de apis que los desarrolladores van a amar usar. principios, patrones y ejemplos reales de implementación que funcionan.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- About Teaser -->
+        <section id="sobre" class="py-64">
+            <div class="container">
+                <div class="about-teaser fade-in">
+                    <h2 class="h3" style="margin-bottom: 32px;">me obsesiona construir cosas simples que hagan la vida menos complicada</h2>
+                    <p class="body-lg" style="color: var(--text-secondary); margin-bottom: 32px; line-height: 1.8;">
+                        pienso en sistemas, no en features. creo que la mejor tecnología es invisible: funciona tan bien que te olvidas de que existe. 
+                        cuando no estoy programando, probablemente esté corriendo kilómetros, leyendo sobre cómo ser mejor papá, o experimentando con nuevas formas de automatizar lo tedioso.
+                    </p>
+                    <a href="#" class="link">conoce más sobre mí →</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-tagline">hecho con café, código y kilómetros</p>
+                <ul class="footer-links">
+                    <li><a href="#">github</a></li>
+                    <li><a href="#">x</a></li>
+                    <li><a href="#">strava</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let isLoading = true;
+        let currentTextIndex = 0;
+        let isAnimating = false;
+        let morphingInterval = null;
+        let typeInterval = null;
+        let eraseInterval = null;
+        let isInitialized = false;
+        let subtitleAnimated = false;
+        
+        const morphingTexts = [
+            "construyo productos reales que nacen de ideas simples y claras.",
+            "eternal early adopter creando sistemas que la gente sí usa.",
+            "papá, runner, maker: vivo entre código, kilómetros y conversaciones.",
+            "diseño experiencias útiles, no features ruidosos ni promesas vacías.",
+            "convierto datos y chats en productos que generan verdadero valor.",
+            "menos ruido, más intención: shipping constante y con propósito.",
+            "de la curiosidad a la acción: progreso diario, simple y concreto.",
+            "construyo flujos que parecen humanos y resuelven de verdad.",
+            "cabeza y corazón: productos que funcionan, historias que inspiran.",
+            "kilómetros, café y código transformados en herramientas vivas."
+        ];
+
+        // Sound Design System
+        let audioContext;
+        let soundEnabled = true;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Initialize sound toggle
+                const soundToggle = document.getElementById('sound-toggle');
+                const soundIcon = document.getElementById('sound-icon');
+                
+                // Load saved preference
+                const savedSoundState = localStorage.getItem('soundEnabled');
+                if (savedSoundState !== null) {
+                    soundEnabled = savedSoundState === 'true';
+                }
+                
+                updateSoundIcon();
+                
+                soundToggle.addEventListener('click', () => {
+                    soundEnabled = !soundEnabled;
+                    localStorage.setItem('soundEnabled', soundEnabled);
+                    updateSoundIcon();
+                    
+                    // Play a test sound when enabling
+                    if (soundEnabled) {
+                        playSound('success');
+                    }
+                    
+                    // Animate button
+                    anime({
+                        targets: soundToggle,
+                        scale: [1, 1.2, 1],
+                        duration: 300,
+                        easing: 'easeOutBack(1.7)'
+                    });
+                });
+                
+                function updateSoundIcon() {
+                    soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+                    soundToggle.classList.toggle('muted', !soundEnabled);
+                }
+                
+            } catch (e) {
+                console.log('Web Audio API not supported');
+                soundEnabled = false;
+            }
+        }
+        
+        function playSound(type) {
+            if (!soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch (type) {
+                case 'typewriter':
+                    // Variable mechanical keys - each key sounds different
+                    const now = audioContext.currentTime;
+                    
+                    // Random key characteristics - more chaos!
+                    const keyType = Math.random();
+                    const isHeavyKey = keyType < 0.25; // 25% heavy keys for more chunky
+                    const isLightKey = keyType > 0.75; // 25% light keys
+                    const isNormalKey = !isHeavyKey && !isLightKey; // 50% normal keys
+                    
+                    // Random chaos factors
+                    const isSlightlyBroken = Math.random() < 0.05; // 5% broken keys
+                    const isExtraChunky = Math.random() < 0.1; // 10% extra chunky
+                    
+                    // Variable buffer duration based on key type
+                    const baseDuration = isHeavyKey ? 0.12 : (isLightKey ? 0.06 : 0.08);
+                    const bufferSize = audioContext.sampleRate * baseDuration;
+                    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    
+                    // Variable decay rate
+                    const decayRate = isHeavyKey ? 6 : (isLightKey ? 12 : 8 + Math.random() * 4);
+                    
+                    // Generate colored noise with variable texture
+                    for (let i = 0; i < bufferSize; i++) {
+                        const t = i / bufferSize;
+                        const decay = Math.exp(-t * decayRate);
+                        
+                        // Variable noise color per key
+                        const whiteAmount = 0.7 + Math.random() * 0.3;
+                        const pinkAmount = 0.2 + Math.random() * 0.2;
+                        
+                        const white = (Math.random() * 2 - 1) * whiteAmount;
+                        const pink = (Math.random() * 2 - 1) * pinkAmount;
+                        
+                        output[i] = (white + pink) * decay;
+                    }
+                    
+                    const noiseSource = audioContext.createBufferSource();
+                    noiseSource.buffer = noiseBuffer;
+                    
+                    // Variable filtering per key position
+                    
+                    // High-pass: Ultra low for maximum bass
+                    const highpass = audioContext.createBiquadFilter();
+                    highpass.type = 'highpass';
+                    let hpFreq = isHeavyKey ? 80 + Math.random() * 120 : 150 + Math.random() * 200;
+                    if (isSlightlyBroken) hpFreq *= 0.6; // Broken key = even deeper
+                    highpass.frequency.setValueAtTime(hpFreq, now);
+                    
+                    // Band-pass: Super chunky frequencies
+                    const bandpass = audioContext.createBiquadFilter();
+                    bandpass.type = 'bandpass';
+                    
+                    let centerFreq;
+                    if (isHeavyKey || isExtraChunky) {
+                        centerFreq = 400 + Math.random() * 500; // Ultra chunky bass
+                    } else if (isLightKey) {
+                        centerFreq = 900 + Math.random() * 800; // Still lower than before
+                    } else {
+                        centerFreq = 600 + Math.random() * 700; // Deeper normal range
+                    }
+                    
+                    // Random frequency chaos
+                    if (isSlightlyBroken) {
+                        centerFreq *= 0.7 + Math.random() * 0.4; // Wild frequency variation
+                    }
+                    
+                    bandpass.frequency.setValueAtTime(centerFreq, now);
+                    bandpass.Q.setValueAtTime(0.6 + Math.random() * 0.6, now);
+                    
+                    // Low-pass: Variable brightness
+                    const lowpass = audioContext.createBiquadFilter();
+                    lowpass.type = 'lowpass';
+                    const lpFreq = 5000 + Math.random() * 3000 + (isHeavyKey ? -1000 : 0);
+                    lowpass.frequency.setValueAtTime(lpFreq, now);
+                    
+                    const clickGain = audioContext.createGain();
+                    
+                    // Chain the filters
+                    noiseSource.connect(highpass);
+                    highpass.connect(bandpass);
+                    bandpass.connect(lowpass);
+                    lowpass.connect(clickGain);
+                    clickGain.connect(audioContext.destination);
+                    
+                    // Chaotic envelope per key type
+                    let baseVolume = isHeavyKey ? 0.22 : (isLightKey ? 0.06 : 0.14);
+                    if (isExtraChunky) baseVolume *= 1.4; // Extra loud chunky keys
+                    if (isSlightlyBroken) baseVolume *= 0.3 + Math.random() * 0.8; // Broken = unpredictable volume
+                    
+                    const volumeVariation = baseVolume + Math.random() * 0.12 - 0.06; // Wider volume range
+                    
+                    // Random timing chaos
+                    const attackTime = (isHeavyKey ? 0.005 : (isLightKey ? 0.001 : 0.003)) * (0.5 + Math.random());
+                    const holdTime = (isHeavyKey ? 0.015 : (isLightKey ? 0.004 : 0.008)) * (0.7 + Math.random() * 0.6);
+                    const decayTime = (isHeavyKey ? 0.09 : (isLightKey ? 0.025 : 0.05)) * (0.8 + Math.random() * 0.4);
+                    
+                    clickGain.gain.setValueAtTime(0, now);
+                    clickGain.gain.linearRampToValueAtTime(volumeVariation, now + attackTime);
+                    clickGain.gain.setValueAtTime(volumeVariation * 0.7, now + holdTime);
+                    clickGain.gain.exponentialRampToValueAtTime(0.001, now + decayTime);
+                    
+                    noiseSource.start(now);
+                    noiseSource.stop(now + baseDuration);
+                    
+                    // Variable spring resonance based on key type
+                    const springChance = isHeavyKey ? 0.8 : (isLightKey ? 0.2 : 0.4);
+                    if (Math.random() < springChance) {
+                        const springDuration = isHeavyKey ? 0.2 : 0.12;
+                        const springBuffer = audioContext.createBuffer(1, audioContext.sampleRate * springDuration, audioContext.sampleRate);
+                        const springOutput = springBuffer.getChannelData(0);
+                        
+                        const springDecay = isHeavyKey ? 8 : 15;
+                        for (let i = 0; i < springOutput.length; i++) {
+                            const t = i / springOutput.length;
+                            springOutput[i] = (Math.random() * 2 - 1) * Math.exp(-t * springDecay) * 0.08;
+                        }
+                        
+                        const springSource = audioContext.createBufferSource();
+                        springSource.buffer = springBuffer;
+                        
+                        const springFilter = audioContext.createBiquadFilter();
+                        springFilter.type = 'bandpass';
+                        const springFreq = isHeavyKey ? 600 + Math.random() * 300 : 900 + Math.random() * 500;
+                        springFilter.frequency.setValueAtTime(springFreq, now);
+                        springFilter.Q.setValueAtTime(1.5 + Math.random(), now);
+                        
+                        const springGain = audioContext.createGain();
+                        springSource.connect(springFilter);
+                        springFilter.connect(springGain);
+                        springGain.connect(audioContext.destination);
+                        
+                        const springDelay = isHeavyKey ? 0.02 : 0.01;
+                        const springVol = isHeavyKey ? 0.04 : 0.02;
+                        
+                        springGain.gain.setValueAtTime(0, now + springDelay);
+                        springGain.gain.linearRampToValueAtTime(springVol, now + springDelay + 0.02);
+                        springGain.gain.exponentialRampToValueAtTime(0.001, now + springDuration);
+                        
+                        springSource.start(now + springDelay);
+                        springSource.stop(now + springDuration);
+                    }
+                    
+                    // Don't use the main oscillator
+                    return;
+                    
+                case 'switch':
+                    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                    oscillator.type = 'sine';
+                    break;
+                    
+                case 'hover':
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.05);
+                    gainNode.gain.setValueAtTime(0.03, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+                    oscillator.type = 'sine';
+                    break;
+                    
+                case 'click':
+                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
+                    oscillator.type = 'triangle';
+                    break;
+                    
+                case 'success':
+                    oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+                    gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+                    oscillator.type = 'sine';
+                    break;
+            }
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // Dark/Light Mode Toggle
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            
+            // Set initial theme
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.setAttribute('data-theme', savedTheme);
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                // Update theme
+                document.documentElement.setAttribute('data-theme', newTheme);
+                themeToggle.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                // Play sound
+                playSound('switch');
+                
+                // Animate toggle
+                anime({
+                    targets: '.theme-toggle-slider',
+                    scale: [1, 1.2, 1],
+                    duration: 300,
+                    easing: 'easeOutBack(1.7)'
+                });
+            });
+        }
+
+        // Loading Screen Epic
+        function initLoadingScreen() {
+            const lines = ['line-1', 'line-2', 'line-3', 'line-4', 'line-5'];
+            const loadingBar = document.getElementById('loading-bar');
+            let progress = 0;
+            
+            // Animate terminal lines
+            lines.forEach((lineId, index) => {
+                setTimeout(() => {
+                    const line = document.getElementById(lineId);
+                    anime({
+                        targets: line,
+                        opacity: [0, 1],
+                        translateX: [-20, 0],
+                        duration: 400,
+                        easing: 'easeOutExpo'
+                    });
+                }, index * 300);
+            });
+
+            // Loading bar animation
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    
+                    setTimeout(() => {
+                        anime({
+                            targets: '#loading-screen',
+                            opacity: [1, 0],
+                            scale: [1, 1.1],
+                            duration: 800,
+                            easing: 'easeInExpo',
+                            complete: () => {
+                                document.getElementById('loading-screen').style.display = 'none';
+                                isLoading = false;
+                                initAllAnimations();
+                            }
+                        });
+                    }, 500);
+                }
+                
+                anime({
+                    targets: loadingBar,
+                    width: progress + '%',
+                    duration: 200,
+                    easing: 'easeOutQuad'
+                });
+            }, 150);
+        }
+
+
+        // Morphing Text Hero - Improved and stable
+        function initMorphingText() {
+            // Prevent multiple initializations
+            if (isInitialized) return;
+            isInitialized = true;
+            
+            const typewriterElement = document.getElementById('typewriter');
+            const heroCursor = document.getElementById('hero-cursor');
+            
+            // Ensure clean start
+            if (!typewriterElement || !heroCursor) return;
+            
+            // Clear any existing intervals
+            function clearAllIntervals() {
+                if (morphingInterval) clearInterval(morphingInterval);
+                if (typeInterval) clearInterval(typeInterval);
+                if (eraseInterval) clearInterval(eraseInterval);
+                morphingInterval = null;
+                typeInterval = null;
+                eraseInterval = null;
+            }
+            
+            function typeText(text, callback) {
+                if (isAnimating || !text) return;
+                isAnimating = true;
+                
+                clearAllIntervals();
+                
+                // Complete reset
+                typewriterElement.textContent = '';
+                typewriterElement.style.opacity = '1';
+                heroCursor.style.opacity = '1';
+                
+                let charIndex = 0;
+                const textToType = text.toString().trim(); // Ensure it's a proper string
+                
+                typeInterval = setInterval(() => {
+                    if (charIndex < textToType.length && typeInterval) {
+                        typewriterElement.textContent = textToType.substring(0, charIndex + 1);
+                        
+                                                 // Play typewriter sound for every 4th character (machine speed)
+                         if (charIndex % 4 === 0) {
+                             playSound('typewriter');
+                         }
+                        
+                        charIndex++;
+                    } else {
+                        if (typeInterval) {
+                            clearInterval(typeInterval);
+                            typeInterval = null;
+                        }
+                        
+                        setTimeout(() => {
+                            heroCursor.style.opacity = '0';
+                            isAnimating = false;
+                            if (callback) callback();
+                        }, 800);
+                    }
+                                 }, 30 + Math.random() * 10); // 30-40ms random timing
+            }
+
+            function eraseText(callback) {
+                if (isAnimating) return;
+                isAnimating = true;
+                
+                clearAllIntervals();
+                heroCursor.style.opacity = '1';
+                
+                const currentText = typewriterElement.textContent || '';
+                let currentLength = currentText.length;
+                
+                if (currentLength === 0) {
+                    isAnimating = false;
+                    if (callback) callback();
+                    return;
+                }
+                
+                eraseInterval = setInterval(() => {
+                    if (currentLength > 0 && eraseInterval) {
+                        typewriterElement.textContent = currentText.substring(0, currentLength - 1);
+                        currentLength--;
+                    } else {
+                        if (eraseInterval) {
+                            clearInterval(eraseInterval);
+                            eraseInterval = null;
+                        }
+                        isAnimating = false;
+                        if (callback) callback();
+                    }
+                }, 25);
+            }
+
+            function morphToNextText() {
+                if (isAnimating) return;
+                
+                // Generate random index, but avoid repeating the same text
+                let nextTextIndex;
+                do {
+                    nextTextIndex = Math.floor(Math.random() * morphingTexts.length);
+                } while (nextTextIndex === currentTextIndex && morphingTexts.length > 1);
+                
+                currentTextIndex = nextTextIndex;
+                
+                eraseText(() => {
+                    // Small glitch effect
+                    typewriterElement.classList.add('glitch');
+                    typewriterElement.setAttribute('data-text', morphingTexts[currentTextIndex]);
+                    
+                    setTimeout(() => {
+                        typewriterElement.classList.remove('glitch');
+                        typeText(morphingTexts[currentTextIndex]);
+                    }, 200);
+                });
+            }
+
+            function startMorphing() {
+                // Clear any existing morphing interval
+                if (morphingInterval) clearInterval(morphingInterval);
+                
+                morphingInterval = setInterval(() => {
+                    morphToNextText();
+                }, 6000);
+            }
+
+            // Clean slate and initialize - complete reset
+            typewriterElement.textContent = '';
+            typewriterElement.style.opacity = '1';
+            typewriterElement.className = 'typewriter-text'; // Reset classes
+            typewriterElement.removeAttribute('data-text'); // Clear data attributes
+            heroCursor.style.opacity = '0';
+            
+            // Double check we have the first text
+            const firstText = morphingTexts[0];
+            if (!firstText) {
+                console.error('No first text available for typewriter');
+                return;
+            }
+            
+            console.log('Starting typewriter with:', firstText);
+            
+            // Initialize with first text after a small delay
+            setTimeout(() => {
+                typeText(firstText, () => {
+                    // Start morphing after initial text is complete
+                    setTimeout(() => {
+                        startMorphing();
+                        animateSubtitleAndButtons();
+                    }, 1500);
+                });
+            }, 100);
+        }
+
+        function animateSubtitleAndButtons() {
+            // Prevent multiple animations
+            if (subtitleAnimated) return;
+            subtitleAnimated = true;
+            
+            const actions = document.querySelector('.hero-actions');
+            
+            // Only animate buttons since subtitle is empty
+            if (actions) {
+                actions.style.opacity = '0';  
+                actions.style.transform = 'translateY(20px)';
+                
+                anime({
+                    targets: actions,
+                    translateY: [20, 0],
+                    opacity: [0, 1],
+                    duration: 1000,
+                    easing: 'easeOutExpo',
+                    complete: () => {
+                        // Mark hero buttons as animated to prevent re-animation
+                        actions.querySelectorAll('.btn').forEach(btn => {
+                            btn.classList.add('btn-animated');
+                        });
+                    }
+                });
+            }
+        }
+
+        // Terminal Secret (CMD+K)
+        function initTerminalSecret() {
+            const terminalOverlay = document.getElementById('terminal-overlay');
+            const terminalContent = document.getElementById('terminal-content');
+            let terminalOpen = false;
+            
+            const commands = {
+                help: [
+                    'Comandos disponibles:',
+                    '  help      - Muestra esta ayuda',
+                    '  about     - Información sobre mí',
+                    '  projects  - Lista de proyectos',
+                    '  skills    - Mis habilidades',
+                    '  contact   - Información de contacto',
+                    '  theme     - Cambiar tema (dark/light)',
+                    '  sound     - Toggle sonido',
+                    '  clear     - Limpiar terminal',
+                    '  exit      - Cerrar terminal',
+                    '  konami    - ¿Qué será?',
+                    '',
+                    'Shortcuts globales:',
+                    '  D         - Toggle tema',
+                    '  S         - Toggle sonido',
+                    '  CMD+K     - Abrir terminal'
+                ],
+                about: [
+                    'Soy un desarrollador apasionado por la IA y productos digitales.',
+                    'Me enfoco en crear soluciones que la gente realmente usa.',
+                    'WhatsApp-first, API-friendly, developer mindset.'
+                ],
+                projects: [
+                    '🤖 whaapy - WhatsApp API para equipos (LATAM)',
+                    '⚡ autoflow - Workflows que se configuran solos',
+                    '🏃 runner.ai - Entrenador personal inteligente'
+                ],
+                skills: [
+                    '💻 JavaScript/Node.js, Python, React',
+                    '🤖 OpenAI, Machine Learning, APIs',
+                    '📱 WhatsApp Business, Automation',
+                    '☁️ Railway, Supabase, Redis'
+                ],
+                contact: [
+                    '📧 Email: tu-email@ejemplo.com',
+                    '🐙 GitHub: github.com/tu-usuario',
+                    '🐦 Twitter: @tu-usuario'
+                ],
+                theme: [
+                    'Tema cambiado exitosamente! ✨'
+                ],
+                sound: [
+                    'Sonido toggle realizado! 🔊'
+                ],
+                konami: [
+                    '🎉 ¡Easter egg desbloqueado!',
+                    '¡Eres oficialmente un hacker!'
+                ]
+            };
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                    e.preventDefault();
+                    toggleTerminal();
+                }
+                
+                if (e.key === 'Escape' && terminalOpen) {
+                    toggleTerminal();
+                }
+                
+                // Global shortcuts (only when terminal is closed)
+                if (!terminalOpen) {
+                    if (e.key === 'd' || e.key === 'D') {
+                        // Toggle dark/light mode
+                        const currentTheme = document.documentElement.getAttribute('data-theme');
+                        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        document.getElementById('theme-toggle').setAttribute('data-theme', newTheme);
+                        localStorage.setItem('theme', newTheme);
+                        playSound('switch');
+                        
+                        // Animate toggle
+                        anime({
+                            targets: '.theme-toggle-slider',
+                            scale: [1, 1.2, 1],
+                            duration: 300,
+                            easing: 'easeOutBack(1.7)'
+                        });
+                    }
+                    
+                    if (e.key === 's' || e.key === 'S') {
+                        // Toggle sound
+                        soundEnabled = !soundEnabled;
+                        localStorage.setItem('soundEnabled', soundEnabled);
+                        const soundIcon = document.getElementById('sound-icon');
+                        const soundToggle = document.getElementById('sound-toggle');
+                        soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+                        soundToggle.classList.toggle('muted', !soundEnabled);
+                        if (soundEnabled) playSound('success');
+                        
+                        // Animate button
+                        anime({
+                            targets: soundToggle,
+                            scale: [1, 1.2, 1],
+                            duration: 300,
+                            easing: 'easeOutBack(1.7)'
+                        });
+                    }
+                }
+            });
+
+            function toggleTerminal() {
+                terminalOpen = !terminalOpen;
+                terminalOverlay.style.display = terminalOpen ? 'flex' : 'none';
+                
+                if (terminalOpen) {
+                    anime({
+                        targets: '.terminal-window',
+                        scale: [0.8, 1],
+                        opacity: [0, 1],
+                        duration: 400,
+                        easing: 'easeOutBack(1.7)'
+                    });
+                }
+            }
+
+            // Terminal command handling
+            terminalContent.addEventListener('click', () => {
+                terminalContent.querySelector('.terminal-cursor').focus();
+            });
+
+            let currentLine = '';
+            document.addEventListener('keydown', (e) => {
+                if (!terminalOpen) return;
+                
+                if (e.key === 'Enter') {
+                    executeCommand(currentLine.trim());
+                    currentLine = '';
+                } else if (e.key === 'Backspace') {
+                    currentLine = currentLine.slice(0, -1);
+                    updateTerminalLine();
+                } else if (e.key.length === 1) {
+                    currentLine += e.key;
+                    updateTerminalLine();
+                }
+            });
+
+            function updateTerminalLine() {
+                const lines = terminalContent.querySelectorAll('.terminal-line');
+                const lastLine = lines[lines.length - 1];
+                lastLine.innerHTML = `tristan@portfolio:~$ ${currentLine}<span class="terminal-cursor"></span>`;
+            }
+
+            function executeCommand(cmd) {
+                const lines = terminalContent.querySelectorAll('.terminal-line');
+                const lastLine = lines[lines.length - 1];
+                lastLine.innerHTML = `tristan@portfolio:~$ ${cmd}`;
+
+                if (cmd === 'clear') {
+                    terminalContent.innerHTML = '<div class="terminal-line">tristan@portfolio:~$ <span class="terminal-cursor"></span></div>';
+                    return;
+                }
+                
+                if (cmd === 'exit') {
+                    toggleTerminal();
+                    return;
+                }
+                
+                if (cmd === 'theme') {
+                    // Toggle theme
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    document.getElementById('theme-toggle').setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    playSound('switch');
+                }
+                
+                if (cmd === 'sound') {
+                    // Toggle sound
+                    soundEnabled = !soundEnabled;
+                    localStorage.setItem('soundEnabled', soundEnabled);
+                    const soundIcon = document.getElementById('sound-icon');
+                    const soundToggle = document.getElementById('sound-toggle');
+                    soundIcon.textContent = soundEnabled ? '🔊' : '🔇';
+                    soundToggle.classList.toggle('muted', !soundEnabled);
+                    if (soundEnabled) playSound('success');
+                }
+
+                const output = commands[cmd] || [`Comando no reconocido: ${cmd}. Escribe 'help' para ver comandos disponibles.`];
+                
+                output.forEach((line, index) => {
+                    setTimeout(() => {
+                        const newLine = document.createElement('div');
+                        newLine.className = 'terminal-line';
+                        newLine.textContent = line;
+                        newLine.style.opacity = '0';
+                        terminalContent.appendChild(newLine);
+                        
+                        anime({
+                            targets: newLine,
+                            opacity: [0, 1],
+                            translateY: [10, 0],
+                            duration: 200,
+                            easing: 'easeOutExpo'
+                        });
+                    }, index * 100);
+                });
+
+                setTimeout(() => {
+                    const newLine = document.createElement('div');
+                    newLine.className = 'terminal-line';
+                    newLine.innerHTML = 'tristan@portfolio:~$ <span class="terminal-cursor"></span>';
+                    terminalContent.appendChild(newLine);
+                    terminalContent.scrollTop = terminalContent.scrollHeight;
+                }, output.length * 100 + 200);
+            }
+        }
+
+        // Scroll Progress Indicator
+        function initScrollProgress() {
+            const scrollIndicator = document.getElementById('scroll-indicator');
+            
+            window.addEventListener('scroll', () => {
+                const scrolled = (window.pageYOffset / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                scrollIndicator.style.height = scrolled + '%';
+            });
+        }
+
+        // Random Glitch Effects
+        function initGlitchEffects() {
+            setInterval(() => {
+                if (Math.random() < 0.1) { // 10% chance every 30 seconds
+                    const glitchElements = document.querySelectorAll('.h2, .project-title');
+                    const randomElement = glitchElements[Math.floor(Math.random() * glitchElements.length)];
+                    
+                    if (randomElement && !randomElement.classList.contains('glitch')) {
+                        randomElement.classList.add('glitch');
+                        randomElement.setAttribute('data-text', randomElement.textContent);
+                        
+                        setTimeout(() => {
+                            randomElement.classList.remove('glitch');
+                        }, 300);
+                    }
+                }
+            }, 30000);
+        }
+
+        // Header scroll effect
+        const header = document.getElementById('header');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Create neural network
+        function createNeuralNetwork() {
+            const container = document.getElementById('neural-network');
+            const nodes = [];
+            const nodeCount = 15;
+
+            // Create nodes
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'network-node';
+                node.style.left = Math.random() * 100 + '%';
+                node.style.top = Math.random() * 100 + '%';
+                container.appendChild(node);
+                nodes.push({
+                    element: node,
+                    x: parseFloat(node.style.left),
+                    y: parseFloat(node.style.top)
+                });
+            }
+
+            // Create connections
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const distance = Math.sqrt(
+                        Math.pow(nodes[i].x - nodes[j].x, 2) + 
+                        Math.pow(nodes[i].y - nodes[j].y, 2)
+                    );
+                    
+                    if (distance < 30) {
+                        const connection = document.createElement('div');
+                        connection.className = 'network-connection';
+                        
+                        const angle = Math.atan2(nodes[j].y - nodes[i].y, nodes[j].x - nodes[i].x);
+                        const length = distance + '%';
+                        
+                        connection.style.width = length;
+                        connection.style.left = nodes[i].x + '%';
+                        connection.style.top = nodes[i].y + '%';
+                        connection.style.transform = `rotate(${angle}rad)`;
+                        
+                        container.appendChild(connection);
+                    }
+                }
+            }
+
+            // Animate network
+            anime({
+                targets: '.network-node',
+                scale: [0, 1],
+                opacity: [0, 0.6],
+                duration: 2000,
+                delay: anime.stagger(100),
+                easing: 'easeOutExpo'
+            });
+
+            anime({
+                targets: '.network-connection',
+                scaleX: [0, 1],
+                opacity: [0, 0.3],
+                duration: 1500,
+                delay: anime.stagger(50, {start: 1000}),
+                easing: 'easeOutExpo'
+            });
+        }
+
+        // Create floating code fragments
+        function createCodeFragments() {
+            const container = document.getElementById('code-fragments');
+            const codeSnippets = [
+                'const ai = new AI()',
+                'api.predict()',
+                'whatsapp.send()',
+                'ml.train(data)',
+                'bot.respond()',
+                'async/await',
+                'fetch(api)',
+                '{...spread}',
+                'useEffect()',
+                'process.env'
+            ];
+
+            codeSnippets.forEach((code, index) => {
+                const fragment = document.createElement('div');
+                fragment.className = 'code-fragment';
+                fragment.textContent = code;
+                fragment.style.left = Math.random() * 90 + '%';
+                fragment.style.top = Math.random() * 90 + '%';
+                container.appendChild(fragment);
+            });
+
+            anime({
+                targets: '.code-fragment',
+                translateY: [-20, 0],
+                opacity: [0, 0.4],
+                duration: 3000,
+                delay: anime.stagger(200, {start: 2000}),
+                easing: 'easeOutExpo'
+            });
+        }
+
+        // Typewriter effect
+        function typewriterEffect() {
+            const text = "construyo productos con ia que la gente sí usa";
+            const typewriterElement = document.getElementById('typewriter');
+            const cursor = document.getElementById('cursor');
+            
+            typewriterElement.style.opacity = '1';
+            typewriterElement.textContent = '';
+            
+            // Type each character
+            for (let i = 0; i < text.length; i++) {
+                setTimeout(() => {
+                    typewriterElement.textContent += text[i];
+                    
+                    // Hide cursor when typing is complete
+                    if (i === text.length - 1) {
+                        setTimeout(() => {
+                            cursor.style.opacity = '0';
+                            
+                            // Animate subtitle and buttons
+                            anime.timeline()
+                                .add({
+                                    targets: '.hero-subtitle',
+                                    translateY: [20, 0],
+                                    opacity: [0, 1],
+                                    duration: 1000,
+                                    easing: 'easeOutExpo'
+                                })
+                                .add({
+                                    targets: '.hero-actions',
+                                    translateY: [20, 0],
+                                    opacity: [0, 1],
+                                    duration: 1000,
+                                    easing: 'easeOutExpo'
+                                }, '-=500');
+                        }, 1000);
+                    }
+                }, i * 80);
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Enhanced button effects with sound
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                playSound('hover');
+            });
+            
+            btn.addEventListener('click', function() {
+                playSound('click');
+            });
+            
+            btn.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const deltaX = (x - centerX) * 0.1;
+                const deltaY = (y - centerY) * 0.1;
+                
+                this.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translate(0px, 0px)';
+            });
+        });
+
+        // Enhanced card hover effects
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for scroll animations
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+
+        // Initialize AI hero animations
+        setTimeout(() => {
+            createNeuralNetwork();
+            createCodeFragments();
+            typewriterEffect();
+        }, 500);
+
+        // Staggered card animations on scroll - Fixed to prevent re-triggering
+        function initScrollAnimations() {
+            const projectCards = document.querySelectorAll('.project-card:not(.animated)');
+            const blogCards = document.querySelectorAll('.blog-card:not(.animated)');
+            
+            const cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
+                        entry.target.classList.add('animated');
+                        
+                        anime({
+                            targets: entry.target,
+                            translateY: [60, 0],
+                            opacity: [0, 1],
+                            scale: [0.9, 1],
+                            duration: 800,
+                            delay: index * 150,
+                            easing: 'easeOutExpo',
+                            complete: () => {
+                                // Disconnect observer to prevent re-animation
+                                cardObserver.unobserve(entry.target);
+                                // Reset inline styles
+                                entry.target.style.opacity = '';
+                                entry.target.style.transform = '';
+                            }
+                        });
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            [...projectCards, ...blogCards].forEach(card => {
+                if (!card.classList.contains('animated')) {
+                    card.style.opacity = '0';
+                    cardObserver.observe(card);
+                }
+            });
+        }
+
+        // Enhanced tag hover effects
+        function initTagAnimations() {
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.addEventListener('mouseenter', function() {
+                    playSound('hover');
+                    anime({
+                        targets: this,
+                        scale: 1.1,
+                        translateY: -3,
+                        duration: 200,
+                        easing: 'easeOutBack(1.7)'
+                    });
+                });
+                
+                tag.addEventListener('mouseleave', function() {
+                    anime({
+                        targets: this,
+                        scale: 1,
+                        translateY: 0,
+                        duration: 300,
+                        easing: 'easeOutElastic(1, .6)'
+                    });
+                });
+            });
+        }
+
+        // Section headers with subtle bounce
+        function initSectionHeaders() {
+            const headers = document.querySelectorAll('.h2');
+            
+            const headerObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('header-animated')) {
+                        entry.target.classList.add('header-animated');
+                        
+                        anime({
+                            targets: entry.target,
+                            translateY: [-30, 0],
+                opacity: [0, 1],
+                            scale: [0.95, 1],
+                duration: 1000,
+                            easing: 'easeOutExpo'
+                        });
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            headers.forEach(header => {
+                header.style.opacity = '0';
+                headerObserver.observe(header);
+            });
+        }
+
+        // Animated section dividers
+        function initSectionDividers() {
+            const dividers = document.querySelectorAll('.section-divider');
+            
+            const dividerObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('divider-animated')) {
+                        entry.target.classList.add('divider-animated');
+                        
+                        anime({
+                            targets: entry.target,
+                            scaleX: [0, 1],
+                            duration: 1200,
+                            easing: 'easeOutExpo'
+                        });
+                    }
+                });
+            }, { threshold: 0.8 });
+
+            dividers.forEach(divider => {
+                divider.style.transform = 'scaleX(0)';
+                dividerObserver.observe(divider);
+            });
+        }
+
+        // About section typewriter effect
+        function initAboutAnimation() {
+            const aboutSection = document.querySelector('.about-teaser');
+            
+            const aboutObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('about-animated')) {
+                        entry.target.classList.add('about-animated');
+                        
+                        // Container animation
+                        anime({
+                            targets: entry.target,
+                            scale: [0.98, 1],
+                opacity: [0, 1],
+                duration: 800,
+                            easing: 'easeOutExpo'
+                        });
+
+                        // Staggered text animation
+                        const textElements = entry.target.querySelectorAll('h2, p');
+                        anime({
+                            targets: textElements,
+                            translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 600,
+                            delay: anime.stagger(200, {start: 400}),
+                            easing: 'easeOutExpo'
+                        });
+
+                        // Link animation
+                        setTimeout(() => {
+                            anime({
+                                targets: entry.target.querySelector('.link'),
+                                translateX: [-20, 0],
+                                opacity: [0, 1],
+                                duration: 500,
+                                easing: 'easeOutExpo'
+                            });
+                        }, 1200);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            if (aboutSection) {
+                aboutSection.style.opacity = '0';
+                aboutSection.querySelectorAll('h2, p, .link').forEach(el => {
+                    el.style.opacity = '0';
+                });
+                aboutObserver.observe(aboutSection);
+            }
+        }
+
+        // Enhanced link hover effects
+        function initLinkAnimations() {
+            document.querySelectorAll('.link').forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    anime({
+                        targets: this,
+                        translateX: 6,
+                        duration: 200,
+                        easing: 'easeOutQuad'
+                    });
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    anime({
+                        targets: this,
+                        translateX: 0,
+                        duration: 300,
+                        easing: 'easeOutBack(1.2)'
+                    });
+                });
+            });
+        }
+
+        // Footer slide-up animation
+        function initFooterAnimation() {
+            const footer = document.querySelector('.footer');
+            
+            const footerObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('footer-animated')) {
+                        entry.target.classList.add('footer-animated');
+                        
+                        anime.timeline()
+            .add({
+                                targets: '.footer-content',
+                                translateY: [40, 0],
+                opacity: [0, 1],
+                duration: 800,
+                                easing: 'easeOutExpo'
+            })
+            .add({
+                                targets: '.footer-links a',
+                                translateY: [20, 0],
+                opacity: [0, 1],
+                                duration: 400,
+                                delay: anime.stagger(100),
+                                easing: 'easeOutExpo'
+                            }, '-=400');
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            if (footer) {
+                footer.querySelector('.footer-content').style.opacity = '0';
+                footer.querySelectorAll('.footer-links a').forEach(link => {
+                    link.style.opacity = '0';
+                });
+                footerObserver.observe(footer);
+            }
+        }
+
+        // Subtle parallax for background elements
+        function initParallaxEffects() {
+            let ticking = false;
+            
+            function updateParallax() {
+                const scrolled = window.pageYOffset;
+                const codeFragments = document.querySelectorAll('.code-fragment');
+                const networkNodes = document.querySelectorAll('.network-node');
+                
+                codeFragments.forEach((fragment, index) => {
+                    const speed = 0.5 + (index % 3) * 0.2;
+                    fragment.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+                
+                networkNodes.forEach((node, index) => {
+                    const speed = 0.3 + (index % 2) * 0.1;
+                    node.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+                
+                ticking = false;
+            }
+            
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', requestTick);
+        }
+
+        // Button reveal animation - Fixed to prevent re-triggering
+        function initButtonAnimations() {
+            const buttons = document.querySelectorAll('.btn:not(.btn-animated)');
+            
+            const buttonObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting && !entry.target.classList.contains('btn-animated')) {
+                        entry.target.classList.add('btn-animated');
+                        
+                    anime({
+                            targets: entry.target,
+                            scale: [0, 1],
+                            rotateZ: [180, 0],
+                        opacity: [0, 1],
+                        duration: 600,
+                            delay: index * 100,
+                            easing: 'easeOutBack(1.7)',
+                        complete: () => {
+                                // Disconnect observer for this button to prevent re-animation
+                                buttonObserver.unobserve(entry.target);
+                                // Reset inline styles to let CSS take over
+                                entry.target.style.opacity = '';
+                                entry.target.style.transform = '';
+                            }
+                            });
+                        }
+                    });
+            }, { threshold: 0.3 });
+
+            buttons.forEach(button => {
+                if (!button.classList.contains('btn-animated')) {
+                    button.style.opacity = '0';
+                    button.style.transform = 'scale(0)';
+                    buttonObserver.observe(button);
+                }
+            });
+        }
+
+        // Subtle breathing effect for project cards
+        function initBreathingEffect() {
+            const cards = document.querySelectorAll('.project-card');
+            
+            cards.forEach((card, index) => {
+            setTimeout(() => {
+                anime({
+                        targets: card,
+                        scale: [1, 1.02, 1],
+                        duration: 4000,
+                        easing: 'easeInOutSine',
+                    loop: true,
+                        delay: index * 1000
+                });
+                }, 3000); // Start after initial animations
+            });
+        }
+                
+        // Floating effect for easter egg
+        function initEasterEggFloat() {
+            const easterEgg = document.querySelector('.easter-egg');
+            
+            if (easterEgg) {
+                anime({
+                    targets: easterEgg,
+                    translateY: [-2, 2],
+                    duration: 2000,
+                    easing: 'easeInOutSine',
+                    loop: true,
+                    direction: 'alternate'
+                });
+            }
+        }
+                
+        // Staggered reveal for navigation links
+        function initNavAnimation() {
+            setTimeout(() => {
+                anime({
+                    targets: '.nav-links a',
+                    translateY: [-10, 0],
+                    opacity: [0, 1],
+                    duration: 500,
+                    delay: anime.stagger(100, {start: 800}),
+                    easing: 'easeOutExpo'
+                });
+            }, 100);
+        }
+
+        // Initialize all animations after loading
+        function initAllAnimations() {
+            // Only create neural network and code fragments here
+            createNeuralNetwork();
+            createCodeFragments();
+            
+            // Start morphing text independently
+            setTimeout(() => {
+                initMorphingText();
+            }, 1000);
+            
+            // Other animations
+            initScrollAnimations();
+            initTagAnimations();
+            initSectionHeaders();
+            initSectionDividers();
+            initAboutAnimation();
+            initLinkAnimations();
+            initFooterAnimation();
+            initParallaxEffects();
+            initButtonAnimations();
+            initNavAnimation();
+            
+            // Initialize subtle effects after 3 seconds
+            setTimeout(() => {
+                initBreathingEffect();
+                initEasterEggFloat();
+            }, 3000);
+        }
+        
+        // Start the magic!
+        document.addEventListener('DOMContentLoaded', () => {
+            // Reset everything first
+            isInitialized = false;
+            isAnimating = false;
+            currentTextIndex = 0;
+            subtitleAnimated = false;
+            
+            // Clear all intervals on page load
+            if (morphingInterval) clearInterval(morphingInterval);
+            if (typeInterval) clearInterval(typeInterval);
+            if (eraseInterval) clearInterval(eraseInterval);
+            
+            // Reset button and card animations
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.classList.remove('btn-animated');
+            });
+            
+            document.querySelectorAll('.project-card, .blog-card').forEach(card => {
+                card.classList.remove('animated');
+                card.style.opacity = '';
+                card.style.transform = '';
+            });
+            
+            initAudio();
+            initThemeToggle();
+            initLoadingScreen();
+            initTerminalSecret();
+            initScrollProgress();
+            initGlitchEffects();
+        });
+
+        // Clean up on page unload to prevent issues on reload
+        window.addEventListener('beforeunload', () => {
+            if (morphingInterval) clearInterval(morphingInterval);
+            if (typeInterval) clearInterval(typeInterval);
+            if (eraseInterval) clearInterval(eraseInterval);
+            isInitialized = false;
+            isAnimating = false;
+            subtitleAnimated = false;
+        });
+
+        // Performance optimization: reduce motion on mobile
+        if (window.innerWidth < 768) {
+            document.querySelectorAll('.code-fragment').forEach(fragment => {
+                fragment.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

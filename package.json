@@ -1,0 +1,19 @@
+{
+  "name": "tristan-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio personal de Tristan - Constructor de productos con IA",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve . -s -l 3000",
+    "dev": "serve . -s -l 3000"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["portfolio", "static-site", "railway"],
+  "author": "Tristan",
+  "license": "MIT"
+}
