@@ -39,5 +39,9 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 
+# Next.js
+.next/
+out/
+
 # Railway
 .railway/
