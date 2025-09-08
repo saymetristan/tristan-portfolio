@@ -963,24 +963,94 @@
         }
 
         /* Responsive Enhancements */
-        @media (max-width: 768px) {
+        /* ===== RESPONSIVE MOBILE ===== */
+        
+        @media (max-width: 480px) {
+            /* Ultra small mobile */
+            .container {
+                padding: 0 16px;
+            }
+            
             .nav-links {
+                display: none; /* Hide nav links, show controls only */
+            }
+            
+            .nav > div:first-child {
+                gap: 16px; /* Tighter spacing */
+            }
+            
+            .nav > div > div:last-child {
+                padding: 6px 8px; /* Smaller controls container */
+                gap: 12px;
+            }
+            
+            .theme-toggle, .sound-toggle {
+                width: 36px;
+                height: 36px;
+                min-width: 36px; /* Better touch targets */
+            }
+            
+            .hero {
+                min-height: 80vh; /* Less height on tiny screens */
+                padding: 32px 0;
+            }
+            
+            .grid-3 { 
+                grid-template-columns: 1fr; /* Single column */
+                gap: 24px; 
+            }
+            
+            .py-96 { padding: 48px 0; }
+            .py-64 { padding: 40px 0; }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile and tablet */
+            .nav-links {
+                gap: 20px;
+                font-size: 14px;
+            }
+            
+            .nav-links a {
+                padding: 12px 0; /* Better touch targets */
+            }
+            
+            .nav > div:first-child {
                 gap: 24px;
+            }
+            
+            .nav > div > div:last-child {
+                gap: 14px;
+            }
+            
+            .hero {
+                min-height: 85vh;
+                padding: 40px 0;
+            }
+            
+            .hero-content {
+                max-width: 100%;
+                text-align: center;
             }
             
             .hero-actions {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 16px;
+                margin-top: 40px;
             }
             
             .btn {
                 width: 100%;
                 justify-content: center;
+                min-height: 52px; /* Better touch targets */
+                font-size: 16px;
             }
             
             .footer-content {
                 flex-direction: column;
                 text-align: center;
+                gap: 32px;
             }
             
             .container {
@@ -992,11 +1062,157 @@
             }
 
             .about-teaser {
-                padding: 32px;
+                padding: 32px 24px;
             }
 
             .project-card:hover {
-                transform: translateY(-4px);
+                transform: translateY(-4px); /* Less dramatic on touch */
+            }
+            
+            /* Better grid spacing */
+            .grid {
+                gap: 24px;
+            }
+            
+            .grid-2 { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .grid-3 { 
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            }
+            
+            /* Adjust spacing for mobile */
+            .py-96 { padding: 64px 0; }
+            .py-64 { padding: 48px 0; }
+            .py-48 { padding: 32px 0; }
+            
+            /* Typography adjustments */
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 2.8rem);
+                line-height: 1.2;
+            }
+            
+            .h2 { 
+                font-size: clamp(1.5rem, 6vw, 2rem); 
+            }
+            
+            /* Neural network less overwhelming on mobile */
+            .neural-network {
+                opacity: 0.3;
+            }
+            
+            .code-fragments {
+                opacity: 0.2;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            /* Tablet landscape */
+            .container {
+                max-width: 900px;
+                padding: 0 32px;
+            }
+            
+            .grid-3 { 
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            }
+        }
+
+        /* ===== TOUCH OPTIMIZATIONS ===== */
+        
+        @media (hover: none) and (pointer: coarse) {
+            /* Touch devices - remove problematic hover effects */
+            .card:hover {
+                transform: none;
+                box-shadow: inherit;
+            }
+            
+            .btn:hover {
+                transform: none;
+            }
+            
+            .tag:hover {
+                transform: none;
+                box-shadow: inherit;
+            }
+            
+            .nav-links a:hover {
+                transform: none;
+            }
+            
+            /* Add active states for better touch feedback */
+            .btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+            
+            .card:active {
+                transform: scale(0.99);
+                transition: transform 0.1s ease;
+            }
+            
+            .theme-toggle:active,
+            .sound-toggle:active {
+                transform: scale(0.95);
+                transition: transform 0.1s ease;
+            }
+        }
+
+        /* ===== PERFORMANCE OPTIMIZATIONS ===== */
+        
+        @media (max-width: 768px) {
+            /* Reduce expensive animations on mobile */
+            .neural-network,
+            .code-fragments {
+                will-change: auto;
+                transform: translateZ(0); /* Force GPU layer */
+            }
+            
+            /* Simplify parallax on mobile */
+            .parallax-element {
+                transform: none !important;
+            }
+            
+            /* Reduce blur effects for better performance */
+            .card,
+            .header,
+            .about-teaser {
+                backdrop-filter: blur(10px);
+            }
+            
+            /* Terminal adjustments for mobile */
+            .terminal-window {
+                width: 95vw;
+                height: 80vh;
+                max-width: none;
+                margin: 10vh auto;
+            }
+            
+            .terminal-content {
+                font-size: 14px;
+                padding: 16px;
+            }
+        }
+
+        /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+        
+        @media (max-width: 480px) {
+            /* Ensure all interactive elements are at least 44px for touch */
+            .btn,
+            .theme-toggle,
+            .sound-toggle,
+            .nav-links a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Better focus indicators on mobile */
+            .btn:focus,
+            .theme-toggle:focus,
+            .sound-toggle:focus {
+                outline: 2px solid var(--lime-primary);
+                outline-offset: 2px;
             }
         }
 
